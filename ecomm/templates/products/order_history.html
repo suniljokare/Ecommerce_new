@@ -1,0 +1,51 @@
+
+
+
+{% extends "base/base.html"  %}
+{% load static %}
+{% load cart %}
+
+
+
+{% block start %}
+  
+
+    <div class="container my-5">
+        {% include 'base/alert.html' %}
+
+        <div class="row">
+            <!-- <h3>Welcome <span class="text-capitalize"> {{request.user}}</h3> --> <br><br>
+         <div class="col-sm-2 border-end">
+          <ul class="list-unstyled">
+          </ul>
+         </div>
+         <div class="col-sm-9 offset-sm-1">
+           {% for order in orders %}
+            
+           {%  for i in order.orderdetails.all  %}
+
+          <div class="row shadow-sm mb-3">
+              <div class="col-sm-2">
+               <img src="/media/{{ product.product_images.first.image}}" alt="" srcset="" class="img-fluid" height="150" width="100">
+              </div>
+              <div class="col-sm-7">
+               <p> Product : {{i.product}}</p>
+               <p> Quantity : {{i.quantity}}</p>
+               <p> Price : {{i.amount}}</p>
+               <p> Price : {{i.grand_total}}</p>
+
+              </div>
+           </div>
+           {% endfor%}
+            {% endfor %}
+
+          </div>
+         </div>
+        </div>
+    </div>
+<br> <br>
+{% endblock  %}
+
+
+
+
