@@ -30,34 +30,25 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
 
-        fields=('image','country','state','city','address_1','address_2','zipcode')
+        fields=('mobile_number','country','state','city','address_1','address_2','zipcode')
 
-        labels = {'image':'User Profile Image',}
-
-        error_messages = {
-            'image':{'required':'Please upload a user profile image'},
-            'country':{'required':'Please select a country'},
-            'state':{'required':'Please select a state'},
-            'city':{'required':'Please select a city'},
-            'address_1':{'required':'Please select a address_1'},
-            'address_2':{'required':'Please select a address_2'},
-            'zipcode':{'required':'Please select a zipcode'},
-        }
+        # labels ={'mobile_number':'','country':'','state':'','city':'','address_1':'','address_2':'','zipcode':''}
 
         widgets = {
-            'country':forms.TextInput(attrs={'class':'myclass','placeholder':'Please Enter  country'}),
-            'city':forms.TextInput(attrs={'class':'myclass','placeholder':'Please Enter  city'}),
-            'address_1':forms.TextInput(attrs={'class':'myclass','placeholder':'Please Enter  address_1'}),
-            'address_2':forms.TextInput(attrs={'class':'myclass','placeholder':'Please Enter  address_2'}),
-            'zipcode':forms.TextInput(attrs={'class':'myclass','placeholder':'Please Enter  zipcode'}),
+            'mobile_number':forms.NumberInput(attrs={'class':'form-control col-md-12', 'placeholder':'enter phone number'}),
+            'country':forms.TextInput(attrs={'class':'form-control col-md-12', 'placeholder':'enter phone number'}),
+            'state':forms.TextInput(attrs={'class':'form-control col-md-12', 'placeholder':'enter phone number'}),
+            'city':forms.TextInput(attrs={'class':'form-control col-md-12','placeholder':'Please Enter  city'}),
+            'address_1':forms.TextInput(attrs={'class':'form-control col-md-12','placeholder':'Please Enter  address_1'}),
+            'address_2':forms.TextInput(attrs={'class':'form-control col-md-12','placeholder':'Please Enter  address_2'}),
+            'zipcode':forms.TextInput(attrs={'class':'form-control col-md-12','placeholder':'Please Enter  zipcode'}),
         }
-
-
 
 class ContactUsForm(forms.ModelForm):
     
     class Meta:
         model = ContactUs
+        
         
         fields=('name','email','contact_no','subject','message')
 
@@ -78,6 +69,7 @@ class ContactUsForm(forms.ModelForm):
             'contact_no':forms.TextInput(attrs={'class':'myclass','placeholder':'Mobile Number'}),
             'city':forms.TextInput(attrs={'class':'myclass','placeholder':'City'}),
             'subject':forms.TextInput(attrs={'class':'myclass','placeholder':'Subject'}),
-            'message':forms.TextInput(attrs={'class':'myclass','placeholder':'Message'}),
+            'message':forms.Textarea(attrs={'cols': 40, 'rows': 8}),
+
 
         }

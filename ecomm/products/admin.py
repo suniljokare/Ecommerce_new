@@ -3,16 +3,6 @@ from .models import *
 from mptt.admin import DraggableMPTTAdmin
 
 
-
-# Register your models here.
-
-# admin.site.register(Product)
-admin.site.register(ProductImages)
-admin.site.register(WhishList)
-admin.site.register(OrderDetails)
-
-# admin.site.register(Category)
-
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name','short_description','price','special_price','quantity','category' )
 
@@ -28,7 +18,19 @@ admin.site.register(Product_Attributes)
 admin.site.register(Product_Attributes_Values)
 admin.site.register(Product_Attributes_Details)
 admin.site.register(Coupon)
-admin.site.register(Order)
+admin.site.register(CustomerOrder)
+admin.site.register(WishList)
+admin.site.register(PaymentGateway)
+admin.site.register(Cart)
+admin.site.register(ProductImages)
+admin.site.register(OrderDetails)
+
+
+
+
+
+
+
 
 
 

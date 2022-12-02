@@ -1,0 +1,25 @@
+{% extends "base/base.html"  %}
+{% load static %}
+{% block start %}
+<link href="{% static 'home/css/profile.css' %}" rel="stylesheet">
+<section >
+            <section id="form">
+    
+                <div class="col-sm-4 col-sm-offset-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="text-left" style="color:black" ><b> PROFILE<b></h3>
+                    </div><hr>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="">
+                            <button class="btn btn-primary profile-button" type="submit">Save Profile</button>
+                            <a class="btn btn-primary profile-button" style="margin-left:10px;" type="button" href="{% url 'adresses' %}"> Manage Adresses</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+            
+
+<script src="{% static '/home/js/custom.js' %}"></script>
+{% endblock %}

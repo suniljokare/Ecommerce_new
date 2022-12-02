@@ -1,51 +1,66 @@
-
-
-
 {% extends "base/base.html"  %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/css/bootstrap.min.css">
+
 {% load static %}
 {% load cart %}
-
-
-
 {% block start %}
-  
-
-    <div class="container my-5">
-        {% include 'base/alert.html' %}
-
-        <div class="row">
-            <!-- <h3>Welcome <span class="text-capitalize"> {{request.user}}</h3> --> <br><br>
-         <div class="col-sm-2 border-end">
-          <ul class="list-unstyled">
-          </ul>
-         </div>
-         <div class="col-sm-9 offset-sm-1">
-           {% for order in orders %}
+<section id="cart_items">
+  <div class="container">
+    <div style="color:red"></div>
+    <div class="table-responsive cart_info">
+      <table class="table table-condensed">
+        <thead>
+          <tr class="cart_menu">
+            <td class="image">Item</td>
+            <td class="description">Name</td>
+            <td class="total">Order_ID</td>
+            <td class="total">Date</td>
+            <td class="price">Price</td>
+            <td class="quantity" style="width: 200px;">Quantity</td>
+            <td class="total">Status</td>
             
-           {%  for i in order.orderdetails.all  %}
 
-          <div class="row shadow-sm mb-3">
-              <div class="col-sm-2">
-               <img src="/media/{{ product.product_images.first.image}}" alt="" srcset="" class="img-fluid" height="150" width="100">
-              </div>
-              <div class="col-sm-7">
-               <p> Product : {{i.product}}</p>
-               <p> Quantity : {{i.quantity}}</p>
-               <p> Price : {{i.amount}}</p>
-               <p> Price : {{i.grand_total}}</p>
-
-              </div>
-           </div>
-           {% endfor%}
+            <td></td>
+          </tr>
+        </thead>
+        <tbody>
+          
+        {% for order in orders %}
+          <tr>
+            {% for image in order.product.product_images.all %}
+            <td class="cart_product">
+              <a href=""><img style="height:70px" src="/media/{{image.image}}"></a>
+            </td>
             {% endfor %}
 
-          </div>
-         </div>
-        </div>
+            <td class="cart_description">
+              <h4><a href="">{{order.product.name|capfirst}}</a></h4>
+            
+            </td>
+            <td class="cart_description">
+                <h4><a href="">{{order.order.id}}</a></h4>
+              </td>
+            <td class="cart_total">
+                <span style="font-size:20px" id="amount">{{order.created_at}}</span>
+              </td>
+            <td class="cart_price">
+              <p>Rs.{{order.product.price}}</p>	
+            </td>
+
+            <td class="cart_quantity" style="width:200px;"> 
+                <div class="cart_quantity_button" style="display: inline-flex;">											
+                  <span id="plus-minus" style="font-size:20px" class="cart_quantity_input" type="text">0{{order.quantity}}</span>
+                </div>
+            </td>
+            <td class="cart_total">
+                <span style="font-size:20px" id="amount">{{order.status}}</span>
+              </td>
+              
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
     </div>
-<br> <br>
-{% endblock  %}
-
-
-
-
+  </div>
+</section> 
+  {%endblock%}

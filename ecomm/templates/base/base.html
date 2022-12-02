@@ -1,6 +1,6 @@
-<!DOCTYPE html>
+
+<DOCTYPE html>
 <html lang="en">
-	
 {% load static %}
 <head>
     <meta charset="utf-8">
@@ -11,8 +11,7 @@
 	{% load static %}
     <link href="{% static 'home/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'home/css/font-awesome.min.css' %}" rel="stylesheet">
-    <link href="{% static 'home/css/prettyPhoto.css' %}Could not parse the remainder: '/js/jquery.js' from 'home/js/jquery.js'
-	" rel="stylesheet">
+    <link href="{% static 'home/css/prettyPhoto.css' %}Could not parse the remainder: '/js/jquery.js' from 'home/js/jquery.js'"  rel="stylesheet">
     <link href="{% static 'home/css/price-range.css' %}" rel="stylesheet">
     <link href="{% static 'home/css/animate.css' %}" rel="stylesheet">
 	<link href="{% static 'home/css/main.css' %}" rel="stylesheet">
@@ -36,8 +35,8 @@
 					<div class="col-sm-6">
 						<div class="contactinfo">
 							<ul class="nav nav-pills">
-								<li><a href="#"><i class="fa fa-phone"></i> +2 95 01 88 821</a></li>
-								<li><a href="#"><i class="fa fa-envelope"></i> info@domain.com</a></li>
+								<li><a href="#"><i class="fa fa-phone"></i> +91 95 01 88 821</a></li>
+								<li><a href="#"><i class="fa fa-envelope"></i> E-Shopper@info.com</a></li>
 							</ul>
 						</div>
 					</div>
@@ -68,13 +67,25 @@
 					<div class="col-sm-8">
 						<div class="shop-menu pull-right">
 							<ul class="nav navbar-nav">
-								<li><a href="#"><i class="fa fa-user"></i> Account</a></li>
-								<li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
+								<!-- <li><a href="{% url 'userprofilepage' %}"><i class="fa fa-user"></i> Account</a></li> -->
+                                <li class="dropdown"><a href="">Account<i class="fa fa-angle-down"></i></a>
+                                    <ul role="menu" class="sub-menu" >
+                                        <li><a href="" > <b style="background-color: black;">Blog List</b></a></li> <br>
+                                        {% if user.is_authenticated %}
+                                            <li ><a href="{% url 'userprofilepage' %}"><b style="background-color: black;">Profile</b> </a></li>
+                                            <li><a href="{% url 'new_password' %}"> <b style="background-color: black;">Change Password</b></a></li>
+                                            <li><a href="{% url 'trackorder' %}"><b style="background-color: black;">Track Your Order</b></a></li>
+                                            
+                                        {% endif %} 
+                                    </ul>
+                                </li> 
+								<li><a href="{% url  'showwishlist' %}"><i class="fa fa-star"></i> Wishlist</a></li>
 								<li><a href="{% url 'order_history' %}"><i class="fa fa-crosshairs"></i> My Orders</a></li>
+
                 {% if user.is_authenticated %}
-               <li><a href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i> Cart <span class="badge badge-info">{{request.session.cart.keys|length}}</span></a></li>
+               <li><a href="{% url 'cart' %}"><i class="fa fa-shopping-cart"></i> Cart <span class="badge badge-info">{{ cart }}</span></a></li>
                {% else %}
-               <li><a href="{% url 'login' %}"><i class="fa fa-shopping-cart"></i> Cart <span class="badge badge-info">{{request.session.cart.keys|length}}</span></a></li>
+               <li><a href="{% url 'login' %}"><i class="fa fa-shopping-cart"></i> Cart <span class="badge badge-info"></span></a></li>
                {% endif %}
               
                {% if user.is_authenticated %}
@@ -104,32 +115,22 @@
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a href="index.html" class="active">Home</a></li>
-								<li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
-                                    <ul role="menu" class="sub-menu">
-                                        <li><a href="shop.html">Products</a></li>
-										<li><a href="product-details.html">Product Details</a></li> 
-										<li><a href="checkout.html">Checkout</a></li> 
-										<li><a href="cart.html">Cart</a></li> 
-										<li><a href="login.html">Login</a></li> 
-                                    </ul>
+								<li><a href="{% url 'homepage' %}" class="active">Home</a></li>
+								<!-- <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a> -->
+								<li><a href="{% url 'products' %}">shop</a></li>
                                 </li> 
-								<li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
-                                    <ul role="menu" class="sub-menu">
-                                        <li><a href="blog.html">Blog List</a></li>
-										<li><a href="blog-single.html">Blog Single</a></li>
-                                    </ul>
-                                </li> 
-								<li><a href="404.html">404</a></li>
-								<li><a href="contact-us.html">Contact</a></li>
+								
 							</ul>
 						</div>
 					</div>
-					<div class="col-sm-3">
-						<div class="search_box pull-right">
-							<input type="text" placeholder="Search"/>
-						</div>
+
+                    <div class="col-sm-3">
+						<form action="{% url 'search_product' %}">
+                            <input type="text" placeholder="Search.." name="search">
+                            <button type="submit"><i class="fa fa-search"></i></button>
+                          </form>
 					</div>
+					
 				</div>
 			</div>
 		</div><!--/header-bottom-->
@@ -210,12 +211,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-3">
+                    <!-- <div class="col-sm-3">
                         <div class="address">
                             <img src="images/home/map.png" alt="" />
                             <p>505 S Atlantic Ave Virginia Beach, VA(Virginia)</p>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -239,12 +240,12 @@
                         <div class="single-widget">
                             <h2>Quock Shop</h2>
                             <ul class="nav nav-pills nav-stacked">
-                                <li><a href="#">T-Shirt</a></li>
-                                <li><a href="#">Mens</a></li>
-                                <li><a href="#">Womens</a></li>
-                                <li><a href="#">Gift Cards</a></li>
-                                <li><a href="#">Shoes</a></li>
-                            </ul>
+                                {% for cat in cats %}
+                                {% for c in cat.get_children %}
+                                <li><a href="{% url 'productfilter' c.id %}"><b>{{c.name}} </b> </a></li>
+                                {% endfor %}
+                                {% endfor %}
+
                         </div>
                     </div>
                     <div class="col-sm-2">
@@ -264,13 +265,17 @@
                             <h2>About Shopper</h2>
                             <ul class="nav nav-pills nav-stacked">
                                 <li><a href="#">Company Information</a></li>
-                                <li><a href="#">Careers</a></li>
+                                <!-- <li><a href="#">Blogs</a></li> -->
+                            <li><a href="{% url 'bloglist'  %}">Blogs</a></li>
+                                
                                 <li><a href="#">Store Location</a></li>
                                 <li><a href="#">Affillate Program</a></li>
-                                <li><a href="#">Copyright</a></li>
+                                <li><a href="{% url 'contactus' %}">Contact</a></li>
                             </ul>
                         </div>
                     </div>
+
+
                     <div class="col-sm-3 col-sm-offset-1">
                         <div class="single-widget">
                             <h2>About Shopper</h2>
@@ -297,6 +302,12 @@
         
     </footer>
   
+    {% block extra_scripts %}
+
+    {% endblock extra_scripts %}
+    
+
+
     <script src="{% static 'home/js/jquery.js' %}"></script>
 	<script src="{% static 'home/js/bootstrap.min.js' %}"></script>
 	<script src="{% static 'home/js/jquery.scrollUp.min.js' %}"></script>
@@ -306,8 +317,6 @@
 
 
     
-
-
 
 </body>
 </html>

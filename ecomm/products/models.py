@@ -1,19 +1,18 @@
-from random import choices
 from django.db import models
 from base.models import BaseModel
 from django.template.defaultfilters import slugify
 from mptt.models import MPTTModel, TreeForeignKey
 from accounts.models import CustomUserModel
-
-# Create your models here.
-
+from .middlewares.auth import *
+from django.db.models import Q
+import uuid
+from base.constant import *
 
 
 class Category(BaseModel,MPTTModel):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     status = models.BooleanField(default=False)
-
     parent = TreeForeignKey('self',blank=True, null=True, related_name='child', on_delete=models.CASCADE )
 
     class Meta:
@@ -28,6 +27,29 @@ class Category(BaseModel,MPTTModel):
             k = k.parent
 
         return ' -> '.join(full_path[::-1])
+
+
+class ProductQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(status=True)
+
+    def search(self, query):
+        return self.filter(name__icontains=query)
+
+
+class ProductManager(models.Manager):
+    def get_queryset(self):
+        return ProductQuerySet(self.model, using=self._db)
+
+    def active(self):
+        return self.get_queryset().active()
+
+    def search(self, query):
+        return self.get_queryset().search(query)
+
+class OrderManager(models.Manager):
+    def get_queryset(self):
+        return super(OrderManager, self).get_queryset().filter(status=True)
 
 
 class Product(BaseModel):
@@ -50,6 +72,10 @@ class Product(BaseModel):
         on_delete=models.CASCADE
     ) 
 
+    objects = ProductManager()
+    search = OrderManager() 
+
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(Product,self).save(*args, **kwargs)
@@ -59,6 +85,8 @@ class Product(BaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+    
     # is_featured = models.BinaryField(default=0)
 
 
@@ -71,17 +99,11 @@ class ProductImages(BaseModel):
         verbose_name_plural = "productimages"   
 
 
-class WhishList(BaseModel):
-    product  = models.CharField(max_length=255)
-
-
-
 class Product_Attributes(BaseModel):
     name = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Product_attributes" 
-
 
     def __str__(self) -> str:
         return self.name
@@ -91,11 +113,9 @@ class Product_Attributes_Values(BaseModel):
     product_attribute = models.ForeignKey(Product_Attributes , on_delete=models.CASCADE , related_name="product_attributes_values")
     attribute_value = models.CharField(max_length=200, null=True, blank=True)
 
-
     class Meta:
         verbose_name_plural = "Product_attributes_values" 
 
-    
     def __str__(self) -> str:
         return self.attribute_value
 
@@ -127,971 +147,115 @@ class Coupon(BaseModel):
         return self.coupon_code
 
 
+class PaymentGateway(BaseModel):
+    name = models.CharField(max_length=200)
 
-
-
-STATE_CHOICES = (("Andhra Pradesh","Andhra Pradesh"),("Arunachal Pradesh ","Arunachal Pradesh "),
-("Assam","Assam"),("Bihar","Bihar"),("Chhattisgarh","Chhattisgarh"),("Goa","Goa"),("Gujarat","Gujarat"),
-("Haryana","Haryana"),("Himachal Pradesh","Himachal Pradesh"),("Jammu and Kashmir ","Jammu and Kashmir "),
-("Jharkhand","Jharkhand"),("Karnataka","Karnataka"),("Kerala","Kerala"),("Madhya Pradesh","Madhya Pradesh"),
-("Maharashtra","Maharashtra"),("Manipur","Manipur"),("Meghalaya","Meghalaya"),("Mizoram","Mizoram"),
-("Nagaland","Nagaland"),("Odisha","Odisha"),("Punjab","Punjab"),("Rajasthan","Rajasthan"),("Sikkim","Sikkim"),
-("Tamil Nadu","Tamil Nadu"),("Telangana","Telangana"),("Tripura","Tripura"),("Uttar Pradesh","Uttar Pradesh"),
-("Uttarakhand","Uttarakhand"),("West Bengal","West Bengal"),("Andaman and Nicobar Islands","Andaman and Nicobar Islands"),
-("Chandigarh","Chandigarh"),("Dadra and Nagar Haveli","Dadra and Nagar Haveli"),("Daman and Diu","Daman and Diu"),
-("Lakshadweep","Lakshadweep"),("National Capital Territory of Delhi","National Capital Territory of Delhi"),
-("Puducherry","Puducherry"))
-
-
-CITY_CHOICES =(('Pune','Pune'),('Mumbai','Mumbai'),('Delhi','Dehli'),('Chennai','Chennai'),('Banglore','Banglore'),('Siliguri','Siliguri'))
-
-
-PAYMENT_CHOICES =(('wallet','wallet'),('card','card'),('netbanking','netbanking'),('emi','emi'),('paypal','paypal'),('cod','cod'))
-
-
-
-class Order(BaseModel):
-    user = models.ForeignKey(CustomUserModel , on_delete=models.CASCADE , related_name="order")
-    payment_method= models.CharField(choices =PAYMENT_CHOICES, max_length=50, default='cod')
-    # awb_no = models.CharField(max_length=200) 
-    # payment = models.OneToOneField(PaymentGateway , on_delete=models.CASCADE , related_name="order")
-    # transaction = 
-    status = models.BooleanField(default=False)
-    grand_total = models.FloatField(blank=True, null=True)
-    shipping_charges =  models.FloatField()
-    # coupon = models.OneToOneField(Coupon , on_delete=models.CASCADE , related_name="coupon_used")
-    name = models.CharField(max_length=10) 
-    mobile = models.CharField(max_length=10) 
-    pincode = models.CharField(max_length=100) 
-    locality = models.CharField(max_length=100) 
-    address= models.CharField(max_length=1024) 
-    city = models.CharField(choices=CITY_CHOICES, max_length =100) 
-    state = models.CharField(choices=STATE_CHOICES, max_length =100) 
-    landmark = models.CharField(max_length=100) 
-    alternate_mobile = models.CharField(max_length=100) 
-
+    class Meta:
+            verbose_name_plural = "PaymentGateway" 
 
     def __str__(self) -> str:
-        return self.name
+            return self.name
 
+
+
+class OrderManager(models.Manager):
+    def get_queryset(self):
+        return super(OrderManager, self).get_queryset().filter(status=True)
+
+
+class CustomerOrder(BaseModel):
+    user = models.ForeignKey(CustomUserModel , on_delete=models.CASCADE , related_name="order")
+    shipping_method= models.CharField( max_length=50, default='rail')
+    awb_no = models.CharField(max_length = 200, default=uuid.uuid4)
+    payment_gateway = models.ForeignKey(PaymentGateway , on_delete=models.CASCADE , related_name="order")
+    transaction_id= models.CharField(max_length=100) 
+    status = models.BooleanField(default=False)
+    grand_total = models.FloatField()
+    shipping_charges =  models.FloatField(default=100)
+    coupon = models.OneToOneField(Coupon , on_delete=models.CASCADE , related_name="coupon_used",blank=True,null=True  )
+    name = models.CharField(max_length=100) 
+    mobile = models.CharField(max_length=10) 
+    email = models.EmailField(max_length=100) 
+    billing_address_1= models.CharField(max_length=1024,blank=False) 
+    billing_address_2 = models.CharField(max_length =100,blank=False) 
+    billing_city = models.CharField(choices=CITY_CHOICES,max_length=100,blank=False) 
+    billing_state = models.CharField(choices=STATE_CHOICES, max_length =100,blank=False) 
+    billing_zipcode = models.CharField(max_length=100,blank=False) 
+    shipping_address_1= models.CharField(max_length=1024,blank=False) 
+    shipping_address_2 = models.CharField( max_length =100,blank=False) 
+    shipping_city = models.CharField(choices=CITY_CHOICES,max_length=100,blank=False) 
+    shipping_state = models.CharField(choices=STATE_CHOICES, max_length =100,blank=False) 
+    shipping_zipcode = models.CharField(max_length=100,blank=False)
+    delivery_status = models.CharField(max_length = 100, choices = choices ,default="In_Progress")
+    
+    objects = models.Manager()  # The default manager.
+    activeorder = OrderManager() 
+
+    def __str__(self) -> str:
+            return self.name
+
+    @staticmethod
+    def obj(id,user):
+        return  CustomerOrder.objects.filter(id=id,user=user).last()
 
 
 class OrderDetails(BaseModel):
-    order = models.ForeignKey(Order , on_delete=models.CASCADE , related_name="orderdetails")
+    order = models.ForeignKey(CustomerOrder , on_delete=models.CASCADE , related_name="orderdetails")
     product = models.ForeignKey(Product , on_delete=models.CASCADE , related_name="orderdetails")
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField()
     amount = models.FloatField()
+    status = models.CharField(choices=STATUS_CHOICES, max_length =100,blank=False,default='Accepted') 
+
+    def __str__(self) -> str:
+            return self.order.name
+
+class WishList(BaseModel):
+    user = models.ForeignKey(CustomUserModel , on_delete=models.CASCADE , related_name="wishlist")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE , related_name="wishlist")
+
+
+    @staticmethod
+    def obj(id,user):
+        return WishList.objects.get(Q(product=id) & Q(user=user))
+
+
+class CurrentUserManager(models.Manager):
+    try:
+        def for_user(self, user):
+            print(user, '!!!!!!!!!!!!!!')
+            if user == 'AnonymousUser':
+                return None
+            else:
+                return super(CurrentUserManager, self).get_queryset().filter(user=user)
+    except:
+        pass
+
+    # def get_queryset(self):
+    #     print(self.current_user(),'^^^^^^^^^^^^^^^')
+    #     return super(CurrentUserManager, self).get_queryset().filter(user=self.current_user())
+
+
+class Cart(BaseModel):
+    user =  models.ForeignKey(CustomUserModel, on_delete=models.CASCADE , related_name="cart")
+    product =  models.ForeignKey(Product, on_delete=models.CASCADE , related_name="cart",null=True)
+    quantity = models.PositiveIntegerField(default=1)
+    objects = models.Manager()  # The default manager.
+    usercart = CurrentUserManager() 
+
+
+    @staticmethod
+    def obj(user):
+        return Cart.objects.filter(user=user)
+
+    def __str__(self):
+        return self.product.name  
+
 
 
 # class CouponsUsed(BaseModel):
 #     user = models.OneToOneField(Profile , on_delete=models.CASCADE , related_name="coupon_used")
 #     order = models.OneToOneField(Order , on_delete=models.CASCADE , related_name="coupon_used")
 #     coupon = models.OneToOneField(Coupon , on_delete=models.CASCADE , related_name="coupon_used")
-
-# class Category(BaseModel):
-#     name = models.CharField(max_length=200)
-#     # parent = models.IntegerField()
-#     status = models.BooleanField(default=False)
-
-
-
-# class ProductCategories(BaseModel):
-#     category = models.OneToOneField(Category , on_delete=models.CASCADE , related_name="product_categories")
-#     product = models.OneToOneField(Product , on_delete=models.CASCADE , related_name="product_categories")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,6 +1,7 @@
 from django import template
 from products.models import *
 from django.contrib import messages
+from datetime import datetime, timedelta
 
 
 register = template.Library()
@@ -16,25 +17,29 @@ def is_in_cart(product  , cart):
 
 
 @register.filter(name='cart_quantity')
-def cart_quantity(product  , cart):
-    keys = cart.keys()
-    for id in keys:
-        if int(id) == product.id:
-            return cart.get(id)
-    return 0
+def cart_quantity():
+    cart =Cart.objects.all().count()
+    
+    return cart if cart >0 else 0
 
 
 @register.filter(name='price_total')
-def price_total(product  , cart):
-    return product.price * cart_quantity(product , cart)
+def price_total(cart):
+    return cart.product.price * cart.quantity
+
+
+@register.filter(name='delivery_date')
+def delivery_date(date):
+    delivery_date = str(date) + str(timedelta(days=4))
+    return delivery_date
 
 
 @register.filter(name='total_cart_price')
-def total_cart_price(products , cart, coupon=None):
+def total_cart_price(carts, coupon=None):
     sum = 0 
     
-    for p in products:
-        sum += price_total(p , cart)
+    for cart in carts:
+        sum += price_total(cart)
     
     if coupon is not None:
         if coupon.minimum_amount < sum:

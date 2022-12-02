@@ -4,11 +4,12 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('', include('home.urls')),
-    # path('Email/',include('Email_Templates.urls')),
+    path('email/',include('Email_Template.urls')),
     path('products/', include('products.urls')),
 ]
 

@@ -1,0 +1,13 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% comment %} {% block title %} Empty Wishlist {% endblock title %} {% endcomment %}
+{% block start %}
+    <div class="container my-5">
+        <div class="row">
+            <h3 class="text-center"> You have no product in your Wishlist </h3>
+            <div class="text-center">
+                <img src="{% static 'media/slider_img/emptywishlist.png' %}" alt="" class="img-fluid img-thumbnail w-25">
+            </div>
+        </div>
+    </div>
+{% endblock %}
