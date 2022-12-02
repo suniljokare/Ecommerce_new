@@ -26,7 +26,6 @@ class HomePageView(TemplateView):
        
         return context
 
-
 # class CategoryMixin(object):
 #     def get_context_data(self, **kwargs):
 #         context['cats'] = Category.objects.filter(parent=None),
