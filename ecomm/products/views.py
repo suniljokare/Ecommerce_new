@@ -331,7 +331,7 @@ endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 class CreateCheckoutSessionView(View):
     def get(self,request,*args,**kwargs):
 
-        host = 'http://127.0.0.1:8000'
+        host = 'http://ec2-52-55-144-240.compute-1.amazonaws.com:8000'
         carts = Cart.obj(request.user)
         total = total_cart_price(carts)
         checkout_session = stripe.checkout.Session.create(

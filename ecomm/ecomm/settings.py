@@ -1,18 +1,18 @@
 
 
 from pathlib import Path
-import environ
+#import environ
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-env = environ.Env(
-    DEBUG=(bool, False)
-)
+#env = environ.Env(
+#    DEBUG=(bool, False)
+#)
 
 
-environ.Env.read_env()
+#environ.Env.read_env()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,10 +27,10 @@ TEMPLATES_DIR = os.path.join(BASE_DIR , 'templates')
 SECRET_KEY='django-insecure-gzf(u4qg80w047^c2@+nw(s&tb-ltde=sv1+7rqz3-0aid7w*('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+#DEBUG = env('DEBUG')
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'accounts.CustomUserModel'
 # Application definition
@@ -106,23 +106,12 @@ WSGI_APPLICATION = 'ecomm.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.postgresql',
-       'NAME': 'emart',
-       'USER': 'postgres',
-       'PASSWORD':'ROOT',
-       'HOST': 'localhost',
-       'PORT': '5432',
-   }
-}
+     'default': {
+         'ENGINE': 'django.db.backends.sqlite3',
+         'NAME': BASE_DIR / 'db.sqlite3',
+     }
+ }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
